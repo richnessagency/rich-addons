@@ -112,22 +112,27 @@ class AddonKernel
     public function bootActiveAddons(): void
     {
         $activeRecords = Cache::remember('rich_addons.active_list', 3600, function () {
-            return AddonModel::where('status', AddonStatus::Active->value)->get();
+            return AddonModel::where('status', AddonStatus::Active->value)->get()->toArray();
         });
 
         foreach ($activeRecords as $record) {
-            $manifestData = $record->manifest ?? [];
+            $manifestData = is_array($record['manifest'] ?? null)
+                ? $record['manifest']
+                : (json_decode($record['manifest'] ?? '{}', true) ?: []);
+
             if (empty($manifestData)) {
                 continue;
             }
 
             $manifest = AddonManifest::fromArray($manifestData);
             $mainClass = $manifest->mainClass;
+            $installedPath = $record['installed_path'] ?? '';
+            $addonId = $record['addon_id'] ?? '';
 
             // AutoloadPSR-4 from local directory if present
-            if ($record->installed_path && ! empty($manifest->psr4)) {
+            if ($installedPath && ! empty($manifest->psr4)) {
                 foreach ($manifest->psr4 as $prefix => $path) {
-                    $srcPath = rtrim($record->installed_path, '/') . '/' . ltrim($path, '/');
+                    $srcPath = rtrim($installedPath, '/') . '/' . ltrim($path, '/');
                     $this->registerPsr4Autoloader($prefix, $srcPath);
                 }
             }
@@ -149,9 +154,9 @@ class AddonKernel
                     $addonInstance->registerAdminRoutes();
                 }
 
-                $this->loadedAddons[$record->addon_id] = $addonInstance;
+                $this->loadedAddons[$addonId] = $addonInstance;
             } catch (\Throwable $e) {
-                logger()->error("Error booting addon [{$record->addon_id}]: " . $e->getMessage());
+                logger()->error("Error booting addon [{$addonId}]: " . $e->getMessage());
             }
         }
     }
