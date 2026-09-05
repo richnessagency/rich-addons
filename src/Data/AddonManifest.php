@@ -28,6 +28,44 @@ final readonly class AddonManifest
     ) {}
 
     /**
+     * Parse an array into an AddonManifest DTO.
+     *
+     * @param array<string, mixed> $data
+     */
+    public static function fromArray(array $data, string $basePath = ''): self
+    {
+        $id = (string) ($data['id'] ?? $data['identifier'] ?? 'unknown');
+
+        return new self(
+            identifier: $id,
+            name: (string) ($data['name'] ?? ''),
+            nameEn: isset($data['name_en']) ? (string) $data['name_en'] : null,
+            version: (string) ($data['version'] ?? '1.0.0'),
+            author: (string) ($data['author'] ?? 'Unknown'),
+            description: (string) ($data['description'] ?? ''),
+            tier: AddonTier::tryFrom((string) ($data['tier'] ?? 'free')) ?? AddonTier::Free,
+            minAppVersion: isset($data['min_app_version']) ? (string) $data['min_app_version'] : null,
+            provider: (string) ($data['mainClass'] ?? $data['provider'] ?? ''),
+            permissions: array_values(array_filter((array) ($data['permissions'] ?? []), 'is_string')),
+            hooks: array_values(array_filter((array) ($data['hooks'] ?? []), 'is_string')),
+            icon: (string) ($data['icon'] ?? 'fa-solid fa-puzzle-piece'),
+            checksum: isset($data['checksum']) ? (string) $data['checksum'] : null,
+            basePath: (string) ($data['base_path'] ?? $basePath),
+        );
+    }
+
+    public function __get(string $name): mixed
+    {
+        return match ($name) {
+            'id' => $this->identifier,
+            'repository' => $this->checksum,
+            'mainClass' => $this->provider,
+            'psr4' => [],
+            default => null,
+        };
+    }
+
+    /**
      * Parse an addon.json file into a manifest DTO.
      *
      * @throws \InvalidArgumentException
@@ -47,30 +85,7 @@ final readonly class AddonManifest
         /** @var array<string, mixed> $data */
         $data = json_decode($raw, true, 32, JSON_THROW_ON_ERROR);
 
-        $required = ['identifier', 'name', 'version', 'provider'];
-
-        foreach ($required as $key) {
-            if (empty($data[$key])) {
-                throw new \InvalidArgumentException("Addon manifest is missing required field '{$key}': {$jsonPath}");
-            }
-        }
-
-        return new self(
-            identifier: (string) $data['identifier'],
-            name: (string) $data['name'],
-            nameEn: isset($data['name_en']) ? (string) $data['name_en'] : null,
-            version: (string) $data['version'],
-            author: (string) ($data['author'] ?? 'Unknown'),
-            description: (string) ($data['description'] ?? ''),
-            tier: AddonTier::tryFrom((string) ($data['tier'] ?? 'free')) ?? AddonTier::Free,
-            minAppVersion: isset($data['min_app_version']) ? (string) $data['min_app_version'] : null,
-            provider: (string) $data['provider'],
-            permissions: array_values(array_filter((array) ($data['permissions'] ?? []), 'is_string')),
-            hooks: array_values(array_filter((array) ($data['hooks'] ?? []), 'is_string')),
-            icon: (string) ($data['icon'] ?? 'fa-solid fa-puzzle-piece'),
-            checksum: isset($data['checksum']) ? (string) $data['checksum'] : null,
-            basePath: dirname($jsonPath),
-        );
+        return self::fromArray($data, dirname($jsonPath));
     }
 
     /**
