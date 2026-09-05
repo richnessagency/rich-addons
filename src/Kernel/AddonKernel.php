@@ -145,6 +145,10 @@ class AddonKernel
                     $addonInstance->registerHooks($this->hookManager);
                 }
 
+                if ($addonInstance instanceof HasAdminPanel) {
+                    $addonInstance->registerAdminRoutes();
+                }
+
                 $this->loadedAddons[$record->addon_id] = $addonInstance;
             } catch (\Throwable $e) {
                 logger()->error("Error booting addon [{$record->addon_id}]: " . $e->getMessage());

@@ -189,21 +189,33 @@
                                 {{ $addon->status->label() }}
                             </span>
 
-                            <!-- Toggle Action Button -->
-                            <form action="{{ route('admin.addons.toggle', $addon->addon_id) }}" method="POST">
-                                @csrf
+                            <!-- Action Buttons -->
+                            <div class="flex items-center gap-2">
                                 @if($addon->isActive())
-                                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 transition-all flex items-center gap-2">
-                                        <i class="fa-solid fa-power-off"></i>
-                                        <span>إلغاء التفعيل</span>
-                                    </button>
-                                @else
-                                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2">
-                                        <i class="fa-solid fa-bolt"></i>
-                                        <span>تفعيل الإضافة</span>
-                                    </button>
+                                    @if($addon->addon_id === 'richness/announcement-bar' || \Illuminate\Support\Facades\Route::has('admin.addons.' . str_replace(['/', '-'], ['.', '_'], $addon->addon_id) . '.settings'))
+                                        <a href="{{ route('admin.addons.announcement-bar.settings') }}" class="dash-btn-neutral px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5" title="إعدادات الإضافة">
+                                            <i class="fa-solid fa-gear"></i>
+                                            <span>الإعدادات</span>
+                                        </a>
+                                    @endif
                                 @endif
-                            </form>
+
+                                <!-- Toggle Action Button -->
+                                <form action="{{ route('admin.addons.toggle', $addon->addon_id) }}" method="POST">
+                                    @csrf
+                                    @if($addon->isActive())
+                                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 transition-all flex items-center gap-2">
+                                            <i class="fa-solid fa-power-off"></i>
+                                            <span>إلغاء التفعيل</span>
+                                        </button>
+                                    @else
+                                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2">
+                                            <i class="fa-solid fa-bolt"></i>
+                                            <span>تفعيل الإضافة</span>
+                                        </button>
+                                    @endif
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

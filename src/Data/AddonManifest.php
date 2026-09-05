@@ -25,6 +25,7 @@ final readonly class AddonManifest
         public string $icon,
         public ?string $checksum,
         public string $basePath,
+        public array $psr4 = [],
     ) {}
 
     /**
@@ -51,6 +52,7 @@ final readonly class AddonManifest
             icon: (string) ($data['icon'] ?? 'fa-solid fa-puzzle-piece'),
             checksum: isset($data['checksum']) ? (string) $data['checksum'] : null,
             basePath: (string) ($data['base_path'] ?? $basePath),
+            psr4: (array) ($data['psr4'] ?? []),
         );
     }
 
@@ -60,7 +62,7 @@ final readonly class AddonManifest
             'id' => $this->identifier,
             'repository' => $this->checksum,
             'mainClass' => $this->provider,
-            'psr4' => [],
+            'psr4' => $this->psr4,
             default => null,
         };
     }
