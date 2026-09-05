@@ -24,9 +24,14 @@ class RichAddonsServiceProvider extends ServiceProvider
             return new HookManager();
         });
 
+        $this->app->singleton(\Richness\RichAddons\Contracts\LicenseVerifier::class, function () {
+            return new \Richness\RichAddons\Licensing\CryptographicLicenseVerifier();
+        });
+
         $this->app->singleton(AddonKernel::class, function ($app) {
             return new AddonKernel(
-                $app->make(HookManager::class)
+                $app->make(HookManager::class),
+                $app->make(\Richness\RichAddons\Contracts\LicenseVerifier::class)
             );
         });
 
