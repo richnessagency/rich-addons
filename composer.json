@@ -1,0 +1,51 @@
+{
+    "name": "richnessagency/rich-addons",
+    "description": "Modular add-on / plugin system for Richness Laravel applications. WordPress-inspired hooks, discovery, licensing & admin UI.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "addons", "plugins", "modular", "hooks", "richness"],
+    "authors": [
+        {
+            "name": "Richness Agency",
+            "homepage": "https://github.com/richnessagency"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/contracts": "^13.0",
+        "illuminate/database": "^13.0",
+        "illuminate/support": "^13.0",
+        "illuminate/console": "^13.0",
+        "illuminate/http": "^13.0",
+        "illuminate/routing": "^13.0",
+        "illuminate/view": "^13.0",
+        "illuminate/encryption": "^13.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.27",
+        "orchestra/testbench": "^11.0",
+        "phpunit/phpunit": "^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Richness\\RichAddons\\": "src/"
+        },
+        "files": [
+            "src/Support/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Richness\\RichAddons\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Richness\\RichAddons\\RichAddonsServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
