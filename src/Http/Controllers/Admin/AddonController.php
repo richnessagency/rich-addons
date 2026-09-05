@@ -55,6 +55,15 @@ class AddonController extends Controller
     public function toggle(string $addonId): RedirectResponse
     {
         try {
+            $addonId = rawurldecode($addonId);
+            $record = AddonModel::where('addon_id', $addonId)
+                ->orWhere('id', $addonId)
+                ->first();
+
+            if ($record) {
+                $addonId = $record->addon_id;
+            }
+
             $isNowActive = $this->kernel->toggle($addonId);
             $message = $isNowActive
                 ? 'تم تفعيل الإضافة بنجاح.'
@@ -72,7 +81,11 @@ class AddonController extends Controller
             'license_key' => 'required|string|max:255',
         ]);
 
-        $addon = AddonModel::where('addon_id', $addonId)->firstOrFail();
+        $addonId = rawurldecode($addonId);
+        $addon = AddonModel::where('addon_id', $addonId)
+            ->orWhere('id', $addonId)
+            ->firstOrFail();
+
         $addon->license_key = $request->input('license_key');
         $addon->save();
 

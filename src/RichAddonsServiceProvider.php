@@ -70,8 +70,12 @@ class RichAddonsServiceProvider extends ServiceProvider
             ->name('admin.addons.')
             ->group(function (): void {
                 Route::get('/', [AddonController::class, 'index'])->name('index');
-                Route::post('/{addonId}/toggle', [AddonController::class, 'toggle'])->name('toggle');
-                Route::post('/{addonId}/license', [AddonController::class, 'updateLicense'])->name('license');
+                Route::post('/{addonId}/toggle', [AddonController::class, 'toggle'])
+                    ->where('addonId', '.*')
+                    ->name('toggle');
+                Route::post('/{addonId}/license', [AddonController::class, 'updateLicense'])
+                    ->where('addonId', '.*')
+                    ->name('license');
             });
     }
 }
