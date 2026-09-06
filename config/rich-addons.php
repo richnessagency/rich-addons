@@ -16,6 +16,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Backward-compatible directory alias
+    |--------------------------------------------------------------------------
+    |
+    | Older runtime code reads "directory". Keep both keys pointed at the same
+    | value so published configs and package defaults behave consistently.
+    |
+    */
+    'directory' => env('RICH_ADDONS_PATH', base_path('addons')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Auto-Discovery
     |--------------------------------------------------------------------------
     |
@@ -31,7 +42,19 @@ return [
     |--------------------------------------------------------------------------
     */
     'admin_route_prefix' => env('RICH_ADDONS_ROUTE_PREFIX', 'admin/addons'),
-    'admin_middleware' => ['web', 'auth', 'admin'],
+    'admin_middleware' => ['web', 'admin.placeholder'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Marketplace
+    |--------------------------------------------------------------------------
+    */
+    'marketplace_url' => env('RICH_ADDONS_MARKETPLACE_URL', env('RICH_ADDONS_LICENSE_SERVER', 'https://richnessagency.com')),
+    'system_key' => env('RICH_ADDONS_SYSTEM_KEY', ''),
+    'system_secret' => env('RICH_ADDONS_SYSTEM_SECRET', ''),
+    'request_timeout_seconds' => (int) env('RICH_ADDONS_TIMEOUT_SECONDS', 5),
+    'staging_path' => env('RICH_ADDONS_STAGING_PATH', storage_path('app/rich-addons/staging')),
+    'release_public_key' => env('RICH_ADDONS_RELEASE_PUBLIC_KEY', ''),
 
     /*
     |--------------------------------------------------------------------------
@@ -43,8 +66,8 @@ return [
     | add-on support can be enabled without config changes.
     |
     */
-    'license_server_url' => env('RICH_ADDONS_LICENSE_SERVER', 'https://richnessagency.com'),
-    'secret_key' => env('RICH_ADDONS_SECRET_KEY', 'RichnessAddonsSecretKey2026!'),
+    'license_server_url' => env('RICH_ADDONS_LICENSE_SERVER', env('RICH_ADDONS_MARKETPLACE_URL', 'https://richnessagency.com')),
+    'secret_key' => env('RICH_ADDONS_SECRET_KEY', ''),
     'public_key_path' => env('RICH_ADDONS_PUBLIC_KEY', ''),
     'heartbeat_interval_hours' => (int) env('RICH_ADDONS_HEARTBEAT_HOURS', 24),
 

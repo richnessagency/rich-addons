@@ -10,6 +10,9 @@ use Illuminate\Support\ServiceProvider;
 use Richness\RichAddons\Hooks\HookManager;
 use Richness\RichAddons\Http\Controllers\Admin\AddonController;
 use Richness\RichAddons\Kernel\AddonKernel;
+use Richness\RichAddons\Marketplace\CentralMarketplaceClient;
+use Richness\RichAddons\Release\HashSignatureVerifier;
+use Richness\RichAddons\Release\ReleaseSignatureVerifier;
 
 class RichAddonsServiceProvider extends ServiceProvider
 {
@@ -34,6 +37,9 @@ class RichAddonsServiceProvider extends ServiceProvider
                 $app->make(\Richness\RichAddons\Contracts\LicenseVerifier::class)
             );
         });
+
+        $this->app->singleton(CentralMarketplaceClient::class);
+        $this->app->singleton(ReleaseSignatureVerifier::class, HashSignatureVerifier::class);
 
         $this->app->alias(HookManager::class, 'rich-addons.hooks');
         $this->app->alias(AddonKernel::class, 'rich-addons.kernel');
@@ -65,11 +71,15 @@ class RichAddonsServiceProvider extends ServiceProvider
 
     protected function registerAdminRoutes(): void
     {
-        Route::prefix('admin/addons')
-            ->middleware(['web', 'admin.placeholder'])
+        Route::prefix((string) config('rich-addons.admin_route_prefix', 'admin/addons'))
+            ->middleware((array) config('rich-addons.admin_middleware', ['web']))
             ->name('admin.addons.')
             ->group(function (): void {
                 Route::get('/', [AddonController::class, 'index'])->name('index');
+                Route::post('/marketplace/refresh', [AddonController::class, 'refreshMarketplace'])->name('marketplace.refresh');
+                Route::post('/{addonId}/install', [AddonController::class, 'install'])
+                    ->where('addonId', '.*')
+                    ->name('install');
                 Route::post('/{addonId}/toggle', [AddonController::class, 'toggle'])
                     ->where('addonId', '.*')
                     ->name('toggle');

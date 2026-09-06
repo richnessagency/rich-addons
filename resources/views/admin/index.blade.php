@@ -19,6 +19,13 @@
         </div>
 
         <div class="flex items-center gap-3">
+            <form action="{{ route('admin.addons.marketplace.refresh') }}" method="POST">
+                @csrf
+                <button type="submit" class="dash-btn-neutral px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>تحديث السوق</span>
+                </button>
+            </form>
             <a href="https://github.com/richnessagency/rich-addons" target="_blank" class="dash-btn-neutral px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2">
                 <i class="fa-brands fa-github"></i>
                 <span>مستودع rich-addons</span>
@@ -129,6 +136,11 @@
                                         <span class="text-[10px] font-mono px-2 py-0.5 rounded-full dash-pill dash-muted">v{{ $addon->version }}</span>
                                     </div>
                                     <span class="text-[11px] font-mono dash-muted block truncate">{{ $addon->addon_id }}</span>
+                                    @if(($addon->source ?? 'local') === 'marketplace')
+                                        <span class="mt-1 inline-flex text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                            Marketplace
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -201,20 +213,30 @@
                                 @endif
 
                                 <!-- Toggle Action Button -->
-                                <form action="{{ route('admin.addons.toggle', $addon->addon_id) }}" method="POST">
-                                    @csrf
-                                    @if($addon->isActive())
-                                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 transition-all flex items-center gap-2">
-                                            <i class="fa-solid fa-power-off"></i>
-                                            <span>إلغاء التفعيل</span>
+                                @if(($addon->source ?? 'local') === 'marketplace' && empty($addon->installed_path))
+                                    <form action="{{ route('admin.addons.install', $addon->addon_id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-lg shadow-sky-500/20 transition-all flex items-center gap-2">
+                                            <i class="fa-solid fa-download"></i>
+                                            <span>تثبيت</span>
                                         </button>
-                                    @else
-                                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2">
-                                            <i class="fa-solid fa-bolt"></i>
-                                            <span>تفعيل الإضافة</span>
-                                        </button>
-                                    @endif
-                                </form>
+                                    </form>
+                                @else
+                                    <form action="{{ route('admin.addons.toggle', $addon->addon_id) }}" method="POST">
+                                        @csrf
+                                        @if($addon->isActive())
+                                            <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 transition-all flex items-center gap-2">
+                                                <i class="fa-solid fa-power-off"></i>
+                                                <span>إلغاء التفعيل</span>
+                                            </button>
+                                        @else
+                                            <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2">
+                                                <i class="fa-solid fa-bolt"></i>
+                                                <span>تفعيل الإضافة</span>
+                                            </button>
+                                        @endif
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     </div>

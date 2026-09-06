@@ -7,6 +7,7 @@ namespace Richness\RichAddons\Kernel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Richness\RichAddons\Contracts\Addon;
 use Richness\RichAddons\Contracts\HasAdminPanel;
 use Richness\RichAddons\Contracts\HasHooks;
@@ -35,7 +36,11 @@ class AddonKernel
      */
     public function discover(): Collection
     {
-        $directory = config('rich-addons.directory', base_path('addons'));
+        if (! $this->hasAddonsTable()) {
+            return collect();
+        }
+
+        $directory = config('rich-addons.addons_path', config('rich-addons.directory', base_path('addons')));
 
         if (! File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
@@ -111,6 +116,10 @@ class AddonKernel
      */
     public function bootActiveAddons(): void
     {
+        if (! $this->hasAddonsTable()) {
+            return;
+        }
+
         $activeRecords = Cache::remember('rich_addons.active_list', 3600, function () {
             return AddonModel::where('status', AddonStatus::Active->value)->get()->toArray();
         });
@@ -179,6 +188,15 @@ class AddonKernel
                 require_once $file;
             }
         });
+    }
+
+    protected function hasAddonsTable(): bool
+    {
+        try {
+            return Schema::hasTable('rich_addons');
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     /**

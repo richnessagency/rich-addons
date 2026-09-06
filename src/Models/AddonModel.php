@@ -21,7 +21,15 @@ use Richness\RichAddons\Data\AddonTier;
  * @property string|null $license_key
  * @property array|null $manifest
  * @property string|null $installed_path
+ * @property string|null $staged_path
+ * @property string|null $source
+ * @property string|null $release_checksum
+ * @property string|null $release_signature
+ * @property string|null $license_payload
+ * @property string|null $failure_reason
  * @property \Illuminate\Support\Carbon|null $activated_at
+ * @property \Illuminate\Support\Carbon|null $installed_at
+ * @property \Illuminate\Support\Carbon|null $last_marketplace_sync_at
  */
 class AddonModel extends Model
 {
@@ -39,6 +47,15 @@ class AddonModel extends Model
         'license_key',
         'manifest',
         'installed_path',
+        'staged_path',
+        'source',
+        'release_checksum',
+        'release_signature',
+        'license_payload',
+        'last_license_result',
+        'failure_reason',
+        'installed_at',
+        'last_marketplace_sync_at',
         'activated_at',
     ];
 
@@ -46,6 +63,10 @@ class AddonModel extends Model
         'tier' => AddonTier::class,
         'status' => AddonStatus::class,
         'manifest' => 'array',
+        'license_payload' => 'array',
+        'last_license_result' => 'array',
+        'installed_at' => 'datetime',
+        'last_marketplace_sync_at' => 'datetime',
         'activated_at' => 'datetime',
     ];
 

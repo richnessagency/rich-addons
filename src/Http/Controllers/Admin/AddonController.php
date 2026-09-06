@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Richness\RichAddons\Kernel\AddonKernel;
+use Richness\RichAddons\Marketplace\InstallMarketplaceAddon;
+use Richness\RichAddons\Marketplace\RefreshMarketplaceCatalog;
 use Richness\RichAddons\Models\AddonModel;
 
 class AddonController extends Controller
@@ -72,6 +74,33 @@ class AddonController extends Controller
             return back()->with('success', $message);
         } catch (\Throwable $e) {
             return back()->with('error', 'خطأ أثناء تغيير حالة الإضافة: ' . $e->getMessage());
+        }
+    }
+
+    public function refreshMarketplace(RefreshMarketplaceCatalog $refreshMarketplace): RedirectResponse
+    {
+        try {
+            $count = $refreshMarketplace->handle()->count();
+
+            return back()->with('success', "تم تحديث سوق الإضافات بنجاح. تم مزامنة {$count} إضافة.");
+        } catch (\Throwable $e) {
+            return back()->with('error', 'تعذر تحديث سوق الإضافات: ' . $e->getMessage());
+        }
+    }
+
+    public function install(string $addonId, InstallMarketplaceAddon $installMarketplaceAddon): RedirectResponse
+    {
+        try {
+            $addon = AddonModel::query()
+                ->where('addon_id', rawurldecode($addonId))
+                ->orWhere('id', $addonId)
+                ->firstOrFail();
+
+            $installMarketplaceAddon->handle($addon);
+
+            return back()->with('success', 'تم تثبيت الإضافة بنجاح. يمكنك تفعيلها الآن.');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'تعذر تثبيت الإضافة: ' . $e->getMessage());
         }
     }
 
