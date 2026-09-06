@@ -158,7 +158,6 @@ class CryptographicLicenseVerifier implements LicenseVerifier
         $signature = $payload['signature'];
         $payloadData = $payload;
         unset($payloadData['signature']);
-        unset($payloadData['signature_alg']);
 
         if (! $this->verifySignature($payloadData, (string) $signature, (string) ($payload['signature_alg'] ?? 'hmac-sha256'))) {
             return false;
