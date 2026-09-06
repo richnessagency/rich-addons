@@ -138,6 +138,10 @@ class AddonKernel
             $installedPath = $record['installed_path'] ?? '';
             $addonId = $record['addon_id'] ?? '';
 
+            if (! $this->canBoot($addonId, $manifest)) {
+                continue;
+            }
+
             // AutoloadPSR-4 from local directory if present
             if ($installedPath && ! empty($manifest->psr4)) {
                 foreach ($manifest->psr4 as $prefix => $path) {
@@ -168,6 +172,52 @@ class AddonKernel
                 logger()->error("Error booting addon [{$addonId}]: " . $e->getMessage());
             }
         }
+    }
+
+    protected function canBoot(string $addonId, AddonManifest $manifest): bool
+    {
+        if (! $manifest->tier->requiresLicense()) {
+            return true;
+        }
+
+        if ($this->licenseVerifier === null) {
+            $this->suspendAddon($addonId, 'تعذر التحقق من الترخيص قبل تشغيل الإضافة.');
+
+            return false;
+        }
+
+        $model = AddonModel::where('addon_id', $addonId)->first();
+
+        if (! $model?->isActive()) {
+            return false;
+        }
+
+        try {
+            $result = $this->licenseVerifier->verify((string) ($model->license_key ?? ''), $manifest, $model);
+        } catch (\Throwable $e) {
+            logger()->warning("License check failed before booting addon [{$addonId}]: " . $e->getMessage());
+            $this->suspendAddon($addonId, 'تعذر التحقق من الترخيص قبل تشغيل الإضافة.');
+
+            return false;
+        }
+
+        if ($result->valid) {
+            return true;
+        }
+
+        $this->suspendAddon($addonId, $result->message ?: 'انتهت صلاحية الترخيص أو فترة السماح.');
+
+        return false;
+    }
+
+    protected function suspendAddon(string $addonId, string $reason): void
+    {
+        AddonModel::where('addon_id', $addonId)->update([
+            'status' => AddonStatus::Suspended->value,
+            'failure_reason' => $reason,
+        ]);
+
+        Cache::forget('rich_addons.active_list');
     }
 
     /**
