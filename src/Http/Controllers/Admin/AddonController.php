@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Richness\RichAddons\Kernel\AddonKernel;
+use Richness\RichAddons\Licensing\CryptographicLicenseVerifier;
 use Richness\RichAddons\Marketplace\InstallMarketplaceAddon;
 use Richness\RichAddons\Marketplace\RefreshMarketplaceCatalog;
 use Richness\RichAddons\Models\AddonModel;
@@ -117,6 +118,15 @@ class AddonController extends Controller
 
         $addon->license_key = $request->input('license_key');
         $addon->save();
+
+        if ($addon->tier->requiresLicense()) {
+            $manifest = \Richness\RichAddons\Data\AddonManifest::fromArray($addon->manifest ?? []);
+            $result = app(CryptographicLicenseVerifier::class)->activate($addon, $manifest);
+
+            if (! $result->valid) {
+                return back()->with('error', 'تعذر تفعيل الترخيص: ' . $result->message);
+            }
+        }
 
         return back()->with('success', 'تم تحديث ترخيص الإضافة بنجاح.');
     }

@@ -68,6 +68,7 @@ return [
     */
     'license_server_url' => env('RICH_ADDONS_LICENSE_SERVER', env('RICH_ADDONS_MARKETPLACE_URL', 'https://richnessagency.com')),
     'secret_key' => env('RICH_ADDONS_SECRET_KEY', ''),
+    'license_public_key' => env('RICH_ADDONS_LICENSE_PUBLIC_KEY', ''),
     'public_key_path' => env('RICH_ADDONS_PUBLIC_KEY', ''),
     'heartbeat_interval_hours' => (int) env('RICH_ADDONS_HEARTBEAT_HOURS', 24),
 
